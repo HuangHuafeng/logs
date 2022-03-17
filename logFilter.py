@@ -1,6 +1,7 @@
 import re
 import os
 from zipfile import ZipFile
+import datetime
 
 tmpDir = "temp"
 
@@ -125,3 +126,9 @@ def isWantedEntry(logEntry, includePatterns, excludePatterns):
             break
 
     return wanted
+
+
+def getLogTime(logEntry):
+    '''return the datetime of the log entry'''
+
+    return datetime.datetime.strptime(logEntry[0][:23], "%Y-%m-%dT%H:%M:%S.%f")
