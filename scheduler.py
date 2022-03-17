@@ -92,21 +92,59 @@ def summarizeSchedulerActivity():
     start = gScheduerActivities.iloc[0]['start']
     end = gScheduerActivities.iloc[-1]['end']
     iterations = len(gScheduerActivities)
-    duration = end - start
-    freq = iterations / duration.total_seconds()
     totalRunnable = gScheduerActivities['runnable'].sum()
     totalProcessed = gScheduerActivities['processed'].sum()
     totalScheduled = gScheduerActivities['scheduled'].sum()
+    averageRunnable = round(gScheduerActivities['runnable'].mean(), 2)
+    averageProcessed = round(gScheduerActivities['processed'].mean(), 2)
+    averageScheduled = round(gScheduerActivities['scheduled'].mean(), 2)
+    averageDuration = round(gScheduerActivities['duration'].mean(), 2)
+    duration = end - start
+    totalSeconds = duration.total_seconds()
+    freq = round(iterations / totalSeconds, 2)
+    freqRunnable = round(totalRunnable / totalSeconds, 2)
+    freqProcessed = round(totalProcessed / totalSeconds, 2)
+    freqScheduled = round(totalScheduled / totalSeconds, 2)
     ActivitiesNotProcessedAllRunnableSteps = gScheduerActivities[gScheduerActivities['processed'] < gScheduerActivities['runnable']]
+    # busyAverageRunnable = ActivitiesNotProcessedAllRunnableSteps['runnable'].mean()
+    # busyAverageProcessed = ActivitiesNotProcessedAllRunnableSteps['processed'].mean()
+    # busyAverageScheduled = ActivitiesNotProcessedAllRunnableSteps['scheduled'].mean()
 
+    print('')
     print('From {} to {} ({}), the scheduler run {} times'.format(start, end, str(duration), iterations))
     print('On average, the scheduler runs {} times every second. '.format(freq), end='')
     print('Please note by default the scheduler can sleep maximim 10 minutes if the server is not busy.')
+    print('')
+
+    # print totals
+    print('----total----')
     print('Total runnable steps: {}. Please note runnable steps might be added multiple times if not processed/scheduled in an interation.'.format(totalRunnable))
     print('Total processed steps: {}'.format(totalProcessed))
     print('Total scheduled steps: {}'.format(totalScheduled))
+    print('')
+
+    # print averages
+    print('----average----')
+    print('Average runnable steps: {} step/iteration, {} step/second'.format(averageRunnable, freqRunnable))
+    print('Average processed steps: {} step/iteration, {} step/second'.format(averageProcessed, freqProcessed))
+    print('Average scheduled steps: {} step/iteration, {} step/second'.format(averageScheduled, freqScheduled))
+    print('Average iteration duration: {} ms'.format(averageDuration))
+    print('')
+
+    # iterrations that were not able to process all runnable steps
     print('There are {} times that not all runnable steps were processed. '.format(len(ActivitiesNotProcessedAllRunnableSteps)), end='')
     print('Please consider that the system is too busy if this happened many times!')
+    if not ActivitiesNotProcessedAllRunnableSteps.empty:
+        busyAverageRunnable = round(ActivitiesNotProcessedAllRunnableSteps['runnable'].mean(), 2)
+        busyAverageProcessed = round(ActivitiesNotProcessedAllRunnableSteps['processed'].mean(), 2)
+        busyAverageScheduled = round(ActivitiesNotProcessedAllRunnableSteps['scheduled'].mean(), 2)
+        busyAverageDuration = round(ActivitiesNotProcessedAllRunnableSteps['duration'].mean(), 2)
+        # print averages
+        print('----average in the busy iterations----')
+        print('Average runnable steps: {} step/iteration'.format(busyAverageRunnable))
+        print('Average processed steps: {} step/iteration'.format(busyAverageProcessed))
+        print('Average scheduled steps: {} step/iteration'.format(busyAverageScheduled))
+        print('Average iteration duration: {} ms'.format(busyAverageDuration))
 
 def isFreeIteration(iterationLogEntries):
     '''check if the iteration is free. In other words, there's no runnable steps to process.'''
